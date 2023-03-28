@@ -23,7 +23,7 @@ export const register = async (req, res, next) => {
     res
       .cookie("accessToken", token, {
         httpOnly: true,
-        sameSite: none,
+        sameSite: "none",
         secure: true,
       })
       .status(201)
