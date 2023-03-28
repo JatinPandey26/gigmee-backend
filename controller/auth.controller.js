@@ -11,17 +11,33 @@ export const register = async (req, res, next) => {
       password: hashedPassword,
     });
     const { password, ...info } = newUser._doc;
-    res.status(201).send(info);
+
+    const token = jwt.sign(
+      {
+        id: newUser._id,
+        isSeller: newUser.isSeller,
+      },
+      process.env.JWT_SECRET
+    );
+
+    res
+      .cookie("accessToken", token, {
+        httpOnly: true,
+        sameSite: none,
+        secure: true,
+      })
+      .status(201)
+      .send(info);
   } catch (error) {
-    next(createError(500, error)); 
-  }   
-}; 
-    
+    next(createError(500, error));
+  }
+};
+
 export const login = async (req, res, next) => {
-  try { 
+  try {
     const user = await User.findOne({ username: req.body.username });
 
-    if (!user) { 
+    if (!user) {
       return next(createError(404, "User not found"));
     }
 
@@ -47,6 +63,8 @@ export const login = async (req, res, next) => {
     res
       .cookie("accessToken", token, {
         httpOnly: true,
+        sameSite: none,
+        secure: true,
       })
       .status(200)
       .send(info);
